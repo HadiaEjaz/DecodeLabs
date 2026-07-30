@@ -1,0 +1,13 @@
+job_role,skills
+Data Scientist,Python;SQL;Machine Learning;Statistics;Data Analysis;Pandas;Data Visualization
+DevOps Engineer,AWS;Docker;Kubernetes;CI/CD;Automation;Linux;Cloud;Terraform
+Backend Developer,Java;Python;SQL;APIs;Data Structures;System Design;Microservices
+Frontend Developer,JavaScript;React;CSS;HTML;UI Design;TypeScript;Web Design
+Cloud Architect,AWS;Cloud;Azure;Kubernetes;Networking;Security;System Design;Automation
+ML Engineer,Python;Machine Learning;TensorFlow;Deep Learning;Data Structures;Statistics;Cloud
+Cybersecurity Analyst,Networking;Security;Linux;Python;Risk Assessment;Cryptography;Automation
+Mobile Developer,Java;Kotlin;Swift;UI Design;APIs;Mobile Frameworks;Git
+Full Stack Developer,JavaScript;React;Python;SQL;APIs;Node.js;Web Design;Git
+Data Engineer,Python;SQL;ETL;Data Structures;Cloud;AWS;Data Pipelines;Automation
+QA Engineer,Automation;Python;Testing Frameworks;CI/CD;Git;Bug Tracking;Selenium
+Systems Administrator,Linux;Networking;Automation;Cloud;Security;Scripting;Bash

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech Stack Recommender — DecodeLabs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDE9DC;
+    --paper-line:#D8D2BF;
+    --ink:#1C1D1B;
+    --ink-soft:#5B5A52;
+    --blue:#24466B;
+    --blue-soft:#4E7BA6;
+    --amber:#C77D14;
+    --amber-soft:#F2D9AE;
+    --card:#F6F4EB;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      linear-gradient(var(--paper-line) 1px, transparent 1px) 0 0/32px 32px,
+      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px) 0 0/32px 32px,
+      var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    padding:48px 20px 80px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--blue);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px;height:1px;
+    background:var(--blue);
+    display:inline-block;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:clamp(32px,6vw,48px);
+    line-height:1.05;
+    margin:0 0 14px;
+    letter-spacing:-0.01em;
+  }
+  .lede{
+    color:var(--ink-soft);
+    font-size:16px;
+    line-height:1.6;
+    max-width:56ch;
+    margin:0 0 40px;
+  }
+  .panel{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:2px;
+    padding:28px;
+    position:relative;
+  }
+  .panel::before{
+    content:"INPUT — USER STATE";
+    position:absolute;
+    top:-10px; left:20px;
+    background:var(--paper);
+    padding:0 8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.12em;
+    color:var(--ink-soft);
+  }
+  label.field-label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .chip-field{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    border:1px solid var(--paper-line);
+    background:#fff;
+    border-radius:2px;
+    padding:10px;
+    min-height:52px;
+  }
+  .chip{
+    background:var(--blue);
+    color:#fff;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    padding:5px 8px 5px 12px;
+    border-radius:2px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .chip button{
+    background:none;border:none;color:#fff;
+    opacity:0.7;cursor:pointer;font-size:14px;
+    line-height:1;padding:0;
+  }
+  .chip button:hover{opacity:1;}
+  #skillInput{
+    border:none;outline:none;flex:1;min-width:140px;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:15px;padding:6px 4px;background:transparent;
+  }
+  .hint{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:10px;
+  }
+  .suggestions{
+    margin-top:14px;
+    display:flex;flex-wrap:wrap;gap:6px;
+  }
+  .sug{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    color:var(--blue);
+    border:1px solid var(--blue-soft);
+    background:transparent;
+    padding:4px 9px;
+    border-radius:2px;
+    cursor:pointer;
+  }
+  .sug:hover{background:var(--blue);color:#fff;}
+  .go{
+    margin-top:24px;
+    width:100%;
+    background:var(--ink);
+    color:#EDE9DC;
+    border:none;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:16px;
+    letter-spacing:0.02em;
+    padding:16px;
+    border-radius:2px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    transition:background 0.15s ease;
+  }
+  .go:disabled{background:#B9B4A4;cursor:not-allowed;}
+  .go:not(:disabled):hover{background:var(--blue);}
+  #results{margin-top:52px;}
+  .results-head{
+    display:flex;justify-content:space-between;align-items:baseline;
+    border-bottom:1px solid var(--paper-line);
+    padding-bottom:10px;margin-bottom:22px;
+  }
+  .results-head h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:19px;margin:0;
+  }
+  .results-head span{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;color:var(--ink-soft);
+  }
+  .role-card{
+    display:grid;
+    grid-template-columns:44px 96px 1fr;
+    gap:20px;
+    align-items:center;
+    padding:20px 4px;
+    border-bottom:1px solid var(--paper-line);
+  }
+  .role-card:last-child{border-bottom:none;}
+  .rank{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:22px;
+    color:var(--paper-line);
+    font-weight:500;
+  }
+  .role-info h3{
+    font-family:'Space Grotesk', sans-serif;
+    margin:0 0 6px;
+    font-size:19px;
+  }
+  .matched{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .matched b{color:var(--blue);font-weight:600;}
+  .compass{display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .compass .pct{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ink);
+  }
+  .fallback-note{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--amber);
+    background:var(--amber-soft);
+    border:1px solid var(--amber);
+    padding:12px 14px;
+    border-radius:2px;
+    margin-bottom:20px;
+    line-height:1.5;
+  }
+  footer{
+    max-width:760px;margin:64px auto 0;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;color:var(--ink-soft);
+    text-align:center;
+    border-top:1px solid var(--paper-line);
+    padding-top:20px;
+  }
+  @media (max-width:520px){
+    .role-card{grid-template-columns:32px 76px 1fr;gap:12px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">DecodeLabs · Project 3 · Content-Based Filtering</div>
+  <h1>Tech Stack<br>Recommender</h1>
+  <p class="lede">Enter at least three skills. The engine converts them into a TF-IDF weighted vector and measures the cosine angle against every job role in its dataset — closer to 0° means a closer match.</p>
+
+  <div class="panel">
+    <label class="field-label" for="skillInput">YOUR SKILLS</label>
+    <div class="chip-field" id="chipField">
+      <input id="skillInput" type="text" placeholder="Type a skill and press Enter…" />
+    </div>
+    <div class="hint">MIN. 3 SKILLS REQUIRED — PRESS ENTER OR COMMA TO ADD</div>
+    <div class="suggestions" id="suggestions"></div>
+    <button class="go" id="goBtn" disabled>RUN SIMILARITY ENGINE →</button>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<footer>TF-IDF + COSINE SIMILARITY · PURE CLIENT-SIDE JS · NO DATA LEAVES YOUR BROWSER</footer>
+
+<script>
+// ---------------------------------------------------------------
+// DATASET — mirrors raw_skills.csv
+// ---------------------------------------------------------------
+const roles = {
+  "Data Scientist": ["python","sql","machine learning","statistics","data analysis","pandas","data visualization"],
+  "DevOps Engineer": ["aws","docker","kubernetes","ci/cd","automation","linux","cloud","terraform"],
+  "Backend Developer": ["java","python","sql","apis","data structures","system design","microservices"],
+  "Frontend Developer": ["javascript","react","css","html","ui design","typescript","web design"],
+  "Cloud Architect": ["aws","cloud","azure","kubernetes","networking","security","system design","automation"],
+  "ML Engineer": ["python","machine learning","tensorflow","deep learning","data structures","statistics","cloud"],
+  "Cybersecurity Analyst": ["networking","security","linux","python","risk assessment","cryptography","automation"],
+  "Mobile Developer": ["java","kotlin","swift","ui design","apis","mobile frameworks","git"],
+  "Full Stack Developer": ["javascript","react","python","sql","apis","node.js","web design","git"],
+  "Data Engineer": ["python","sql","etl","data structures","cloud","aws","data pipelines","automation"],
+  "QA Engineer": ["automation","python","testing frameworks","ci/cd","git","bug tracking","selenium"],
+  "Systems Administrator": ["linux","networking","automation","cloud","security","scripting","bash"]
+};
+
+const vocab = [...new Set(Object.values(roles).flat())].sort();
+
+function computeIdf(){
+  const total = Object.keys(roles).length;
+  const idf = {};
+  vocab.forEach(term=>{
+    const docsWith = Object.values(roles).filter(s=>s.includes(term)).length;
+    idf[term] = Math.log(total/(1+docsWith)) + 1;
+  });
+  return idf;
+}
+const idf = computeIdf();
+
+function tf(skillList){
+  const counts = {};
+  skillList.forEach(s=>counts[s]=(counts[s]||0)+1);
+  const total = skillList.length;
+  const out = {};
+  Object.keys(counts).forEach(k=>out[k]=counts[k]/total);
+  return out;
+}
+
+function tfidfVector(skillList){
+  const t = tf(skillList);
+  const vec = {};
+  vocab.forEach(term=>{ vec[term] = (t[term]||0) * idf[term]; });
+  return vec;
+}
+
+function cosineSim(a,b){
+  let dot=0,na=0,nb=0;
+  vocab.forEach(t=>{ dot += a[t]*b[t]; na += a[t]*a[t]; nb += b[t]*b[t]; });
+  na=Math.sqrt(na); nb=Math.sqrt(nb);
+  if(na===0||nb===0) return 0;
+  return dot/(na*nb);
+}
+
+function recommend(userSkills){
+  const clean = userSkills.map(s=>s.toLowerCase());
+  const coldStart = !clean.some(s=>vocab.includes(s));
+  if(coldStart){
+    const trending = Object.entries(roles)
+      .sort((a,b)=>b[1].length-a[1].length)
+      .slice(0,3)
+      .map(([role])=>({role, score:null, matched:[]}));
+    return {coldStart:true, results:trending};
+  }
+  const userVec = tfidfVector(clean);
+  const scored = Object.entries(roles).map(([role, skills])=>{
+    const roleVec = tfidfVector(skills);
+    const score = cosineSim(userVec, roleVec);
+    const matched = skills.filter(s=>clean.includes(s));
+    return {role, score, matched};
+  });
+  scored.sort((a,b)=>b.score-a.score);
+  return {coldStart:false, results:scored.slice(0,3)};
+}
+
+// ---------------------------------------------------------------
+// UI — chip input
+// ---------------------------------------------------------------
+const chipField = document.getElementById('chipField');
+const skillInput = document.getElementById('skillInput');
+const goBtn = document.getElementById('goBtn');
+const suggestionsEl = document.getElementById('suggestions');
+let skills = [];
+
+const sampleTags = ["Python","Cloud","Automation","JavaScript","React","SQL","Machine Learning","Linux"];
+sampleTags.forEach(tag=>{
+  const b = document.createElement('button');
+  b.className='sug'; b.textContent='+ '+tag;
+  b.onclick = ()=>addSkill(tag);
+  suggestionsEl.appendChild(b);
+});
+
+function addSkill(val){
+  val = val.trim();
+  if(!val) return;
+  if(skills.map(s=>s.toLowerCase()).includes(val.toLowerCase())) return;
+  skills.push(val);
+  renderChips();
+}
+function removeSkill(i){
+  skills.splice(i,1);
+  renderChips();
+}
+function renderChips(){
+  [...chipField.querySelectorAll('.chip')].forEach(c=>c.remove());
+  skills.forEach((s,i)=>{
+    const chip = document.createElement('span');
+    chip.className='chip';
+    chip.innerHTML = `${s} <button aria-label="remove">×</button>`;
+    chip.querySelector('button').onclick = ()=>removeSkill(i);
+    chipField.insertBefore(chip, skillInput);
+  });
+  goBtn.disabled = skills.length < 3;
+}
+
+skillInput.addEventListener('keydown', (e)=>{
+  if(e.key==='Enter' || e.key===','){
+    e.preventDefault();
+    addSkill(skillInput.value);
+    skillInput.value='';
+  } else if(e.key==='Backspace' && skillInput.value==='' && skills.length){
+    removeSkill(skills.length-1);
+  }
+});
+
+// ---------------------------------------------------------------
+// Compass gauge — visualizes cos(θ) angle, echoing the project's
+// own "angle between vectors" diagram
+// ---------------------------------------------------------------
+function compassSVG(score){
+  const cx=42, cy=48, r=32;
+  if(score===null){
+    return `<svg width="88" height="60" viewBox="0 0 88 60">
+      <path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx} ${cy-r}" stroke="#B9B4A4" stroke-width="2" fill="none"/>
+      <text x="44" y="50" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#5B5A52">N/A</text>
+    </svg>`;
+  }
+  const theta = Math.acos(Math.min(1,Math.max(0,score))) * (180/Math.PI); // 0=aligned .. 90=orthogonal
+  const rad = theta * Math.PI/180;
+  const nx = cx + r*Math.sin(rad);
+  const ny = cy - r*Math.cos(rad);
+  const color = score > 0.5 ? '#24466B' : '#C77D14';
+  return `<svg width="88" height="60" viewBox="0 0 88 60">
+    <path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx} ${cy-r}" stroke="#D8D2BF" stroke-width="2" fill="none"/>
+    <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="3" fill="${color}"/>
+  </svg>`;
+}
+
+function renderResults({coldStart, results}){
+  const el = document.getElementById('results');
+  let html = `<div class="results-head"><h2>TOP MATCHES</h2><span>${coldStart ? 'FALLBACK MODE' : 'RANKED BY COSINE SIMILARITY'}</span></div>`;
+  if(coldStart){
+    html += `<div class="fallback-note">⚠ COLD START — none of your skills exist in the current dataset. Showing the broadest, most in-demand roles instead.</div>`;
+  }
+  results.forEach((r, i)=>{
+    const pct = r.score===null ? '—' : Math.round(r.score*100)+'% aligned';
+    const matchedText = r.matched && r.matched.length
+      ? r.matched.map(m=>`<b>${m}</b>`).join(', ')
+      : 'no direct overlap';
+    html += `<div class="role-card">
+      <div class="rank">${String(i+1).padStart(2,'0')}</div>
+      <div class="compass">${compassSVG(r.score)}<span class="pct">${pct}</span></div>
+      <div class="role-info">
+        <h3>${r.role}</h3>
+        <div class="matched">MATCHED: ${matchedText}</div>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+  el.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+goBtn.addEventListener('click', ()=>{
+  if(skills.length < 3) return;
+  const output = recommend(skills);
+  renderResults(output);
+});
+</script>
+</body>
+</html>
